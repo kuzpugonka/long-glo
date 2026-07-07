@@ -1,3 +1,5 @@
-// alert('Hi')
+const div = document.getElementById('github');
 
-console.log('hi1111');
+const logged = () => {
+  console.log(div.textContent);
+}
