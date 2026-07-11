@@ -30,11 +30,18 @@ const getRollbackMessage = (price) => {
   }
 };
 
-showTypeOf (title);
+const getAllServicePrices = function (a, b) {
+  const allServicePrices = a + b;
+  return allServicePrices;
+};
+
+showTypeOf(title);
 showTypeOf(screenPrice);
 showTypeOf(adaptive);
 
 console.log(getRollbackMessage(fullPrice));
+console.log(getAllServicePrices(servicePrice1, servicePrice2));
+
 console.log(typeof title);
 console.log(typeof fullPrice);
 console.log(typeof adaptive);
