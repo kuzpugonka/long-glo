@@ -26,6 +26,14 @@ const getTitle = (a) => {
   return firstChar + restOfString;
 };
 
+const getAllServicePrices = function (a, b) {
+  return a + b;
+};
+
+function getFullPrice(a, b) {
+  return a + b;
+}
+
 const getRollbackMessage = (price) => {
   if (price >= 30000) {
     return "Даем скидку в 10%";
@@ -38,31 +46,22 @@ const getRollbackMessage = (price) => {
   }
 };
 
-const getAllServicePrices = function (a, b) {
-  return  a + b;
+const getServicePercentPrice = () => {
+  return Math.ceil(fullPrice - fullPrice * (rollback / 100));
 };
-
-function getFullPrice(a, b) {
-  return a + b;
-}
-
-const getServicePercentPrice = () => {  
-  return Math.ceil(fullPrice - fullPrice * (rollback / 100)); 
-}
 
 const showTypeOf = (variable) => {
   console.log(variable, typeof variable);
 };
 
-showTypeOf(title);
-showTypeOf(screenPrice);
-showTypeOf(adaptive);
-
 title = getTitle(title);
 allServicePrices = getAllServicePrices(servicePrice1, servicePrice2);
 fullPrice = getAllServicePrices(screenPrice, allServicePrices);
-servicePercentPrice = getServicePercentPrice();
+servicePercentPrice = getServicePercentPrice(fullPrice);
 
+showTypeOf(title);
+showTypeOf(screenPrice);
+showTypeOf(adaptive);
 
 console.log(screens);
 console.log(getRollbackMessage(fullPrice));
