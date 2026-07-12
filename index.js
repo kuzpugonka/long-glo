@@ -40,8 +40,7 @@ const getRollbackMessage = (price) => {
 };
 
 const getAllServicePrices = function (a, b) {
-  const sum = a + b;
-  return sum;
+  return  a + b;
 };
 
 allServicePrices = getAllServicePrices(servicePrice1, servicePrice2);
