@@ -13,6 +13,7 @@ const servicePrice2 = +prompt("Сколько это будет стоить?");
 const rollback = 15;
 let fullPrice = 0;
 let allServicePrices = 0;
+let servicePercentPrice = 0;
 
 const getTitle = (a) => {
   let trimmedTitle = title.trimStart();
@@ -24,7 +25,6 @@ const getTitle = (a) => {
 
   return firstChar + restOfString;
 };
-
 getTitle(title);
 
 const getRollbackMessage = (price) => {
@@ -51,7 +51,11 @@ function getFullPrice(a, b) {
   return sum;
 }
 fullPrice = getAllServicePrices(screenPrice, allServicePrices);
-const servicePercentPrice = Math.ceil(fullPrice - fullPrice * (rollback / 100)); //костыль
+
+const getServicePercentPrice = () => {  
+  return Math.ceil(fullPrice - fullPrice * (rollback / 100)); 
+}
+servicePercentPrice = getServicePercentPrice();
 
 const showTypeOf = (variable) => {
   console.log(variable, typeof variable);
@@ -77,6 +81,7 @@ console.log(
 );
 
 console.log(getRollbackMessage(fullPrice));
-console.log("allServicePrices: ", allServicePrices);
+console.log(allServicePrices);
 console.log(fullPrice);
-console.log("getTitle(title): ", getTitle(title));
+console.log(getTitle(title));
+console.log(servicePercentPrice);
