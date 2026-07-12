@@ -14,9 +14,18 @@ const rollback = 15;
 let fullPrice = 0;
 let allServicePrices = 0;
 
-const showTypeOf = (variable) => {
-  console.log(variable, typeof variable);
+const getTitle = (a) => {
+  let trimmedTitle = title.trimStart();
+  if (trimmedTitle.length === 0) {
+    return "";
+  }
+  const firstChar = trimmedTitle.charAt(0).toUpperCase();
+  const restOfString = trimmedTitle.slice(1).toLowerCase();
+
+  return firstChar + restOfString;
 };
+
+getTitle(title);
 
 const getRollbackMessage = (price) => {
   if (price >= 30000) {
@@ -44,6 +53,10 @@ function getFullPrice(a, b) {
 fullPrice = getAllServicePrices(screenPrice, allServicePrices);
 const servicePercentPrice = Math.ceil(fullPrice - fullPrice * (rollback / 100)); //костыль
 
+const showTypeOf = (variable) => {
+  console.log(variable, typeof variable);
+};
+
 showTypeOf(title);
 showTypeOf(screenPrice);
 showTypeOf(adaptive);
@@ -66,3 +79,4 @@ console.log(
 console.log(getRollbackMessage(fullPrice));
 console.log("allServicePrices: ", allServicePrices);
 console.log(fullPrice);
+console.log("getTitle(title): ", getTitle(title));
