@@ -65,23 +65,6 @@ showTypeOf(title);
 showTypeOf(screenPrice);
 showTypeOf(adaptive);
 
-console.log(typeof title);
-console.log(typeof fullPrice);
-console.log(typeof adaptive);
-
-console.log(screens.length);
-console.log("servicePercentPrice: ", servicePercentPrice);
-
-console.log(
-  "Стоимость верски экранов " +
-    screenPrice +
-    " руб. Стоимость разработки сайта " +
-    servicePercentPrice +
-    " руб.",
-);
-
+console.log(screens);
 console.log(getRollbackMessage(fullPrice));
-console.log(allServicePrices);
-console.log(fullPrice);
-console.log(getTitle(title));
 console.log(servicePercentPrice);
