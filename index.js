@@ -13,6 +13,7 @@ const servicePrice2 = +prompt("Сколько это будет стоить?");
 const rollback = 15;
 const fullPrice = screenPrice + servicePrice1 + servicePrice2;
 const servicePercentPrice = Math.ceil(fullPrice - fullPrice * (rollback / 100));
+let allServicePrices = 0;
 
 const showTypeOf = (variable) => {
   console.log(variable, typeof variable);
@@ -31,16 +32,15 @@ const getRollbackMessage = (price) => {
 };
 
 const getAllServicePrices = function (a, b) {
-  const allServicePrices = a + b;
-  return allServicePrices;
+  const sum = a + b;
+  return sum;
 };
+
+allServicePrices = getAllServicePrices(servicePrice1, servicePrice2);
 
 showTypeOf(title);
 showTypeOf(screenPrice);
 showTypeOf(adaptive);
-
-console.log(getRollbackMessage(fullPrice));
-console.log(getAllServicePrices(servicePrice1, servicePrice2));
 
 console.log(typeof title);
 console.log(typeof fullPrice);
@@ -56,3 +56,6 @@ console.log(
     servicePercentPrice +
     " руб.",
 );
+
+console.log(getRollbackMessage(fullPrice));
+console.log("allServicePrices: ", allServicePrices);
