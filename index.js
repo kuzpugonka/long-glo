@@ -11,8 +11,7 @@ const servicePrice1 = +prompt("Сколько это будет стоить?");
 const service2 = prompt("Какой дополнительный тип услуги нужен?");
 const servicePrice2 = +prompt("Сколько это будет стоить?");
 const rollback = 15;
-const fullPrice = screenPrice + servicePrice1 + servicePrice2;
-const servicePercentPrice = Math.ceil(fullPrice - fullPrice * (rollback / 100));
+let fullPrice = 0;
 let allServicePrices = 0;
 
 const showTypeOf = (variable) => {
@@ -38,6 +37,13 @@ const getAllServicePrices = function (a, b) {
 
 allServicePrices = getAllServicePrices(servicePrice1, servicePrice2);
 
+function getFullPrice(a, b) {
+  const sum = a + b;
+  return sum;
+}
+fullPrice = getAllServicePrices(screenPrice, allServicePrices);
+const servicePercentPrice = Math.ceil(fullPrice - fullPrice * (rollback / 100)); //костыль
+
 showTypeOf(title);
 showTypeOf(screenPrice);
 showTypeOf(adaptive);
@@ -59,3 +65,4 @@ console.log(
 
 console.log(getRollbackMessage(fullPrice));
 console.log("allServicePrices: ", allServicePrices);
+console.log(fullPrice);
