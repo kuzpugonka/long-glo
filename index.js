@@ -1,6 +1,6 @@
 "use strict";
 
-const title = prompt("Как называется Ваш проект?");
+let title = prompt("Как называется Ваш проект?");
 const screens = prompt(
   "Какие типы экранов нужно разработать: простые, сложные или интерактивные?",
 );
@@ -25,7 +25,6 @@ const getTitle = (a) => {
 
   return firstChar + restOfString;
 };
-getTitle(title);
 
 const getRollbackMessage = (price) => {
   if (price >= 30000) {
@@ -43,18 +42,13 @@ const getAllServicePrices = function (a, b) {
   return  a + b;
 };
 
-allServicePrices = getAllServicePrices(servicePrice1, servicePrice2);
-
 function getFullPrice(a, b) {
-  const sum = a + b;
-  return sum;
+  return a + b;
 }
-fullPrice = getAllServicePrices(screenPrice, allServicePrices);
 
 const getServicePercentPrice = () => {  
   return Math.ceil(fullPrice - fullPrice * (rollback / 100)); 
 }
-servicePercentPrice = getServicePercentPrice();
 
 const showTypeOf = (variable) => {
   console.log(variable, typeof variable);
@@ -63,6 +57,12 @@ const showTypeOf = (variable) => {
 showTypeOf(title);
 showTypeOf(screenPrice);
 showTypeOf(adaptive);
+
+title = getTitle(title);
+allServicePrices = getAllServicePrices(servicePrice1, servicePrice2);
+fullPrice = getAllServicePrices(screenPrice, allServicePrices);
+servicePercentPrice = getServicePercentPrice();
+
 
 console.log(screens);
 console.log(getRollbackMessage(fullPrice));
