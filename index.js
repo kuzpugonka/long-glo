@@ -2,36 +2,70 @@
 
 const appData = {
   title: "",
-  screens: "",
+  screens: [],
   screenPrice: 0,
   adaptive: true,
   rollback: 10,
   allServicePrices: 0,
   fullPrice: 0,
   servicePercentPrice: 0,
-  service1: "",
-  service2: "",
+  services: [],
+  start: function () {
+    appData.asking();
+    appData.addPrices();
+    appData.getTitle(appData.title);
+    appData.getFullPrice(appData.screenPrice, appData.allServicePrices);
+    appData.getServicePercentPrice(appData.fullPrice);
+
+    appData.logger();
+  },
+  isNumber: function (num) {
+    return !isNaN(parseFloat(num)) && isFinite(num);
+  },
   asking: function () {
     appData.title = prompt(
       "Как называется Ваш проект?",
       "     oooooIIIIIOOOoo",
     );
-    appData.screens = prompt(
-      "Какие типы экранов нужно разработать: простые, сложные или интерактивные?",
-      "простые",
-    );
 
-    do {
-      appData.screenPrice = +prompt(
-        "Сколько будет стоить данная работа?",
-        20000,
+    for (let i = 0; i < 2; i++) {
+      let name = prompt(
+        "Какие типы экранов нужно разработать: простые, сложные или интерактивные?",
+        "простые",
+      );
+      let price = 0;
+
+      do {
+        price = +prompt("Сколько будет стоить данная работа?", 20000).trim();
+      } while (!appData.isNumber(price));
+
+      appData.screens.push({ id: i, name: name, price: price }); 
+    }
+
+    for (let i = 0; i < 2; i++) {
+      let name = prompt(
+        "Какой дополнительный тип услуги нужен?",
+        "Простые",
       ).trim();
-    } while (!appData.isNumber(appData.screenPrice));
+      let price = 0;
+
+      do {
+        price = prompt("Сколько это будет стоить?").trim();
+      } while (!appData.isNumber(price));
+
+      appData.services.push({ id: i, name: name, price: price });
+    }
 
     appData.adaptive = confirm("Нужен ли адаптив на сайте?");
   },
-  isNumber: function (num) {
-    return !isNaN(parseFloat(num)) && isFinite(num);
+  addPrices: function () {
+    for (let screen of appData.screens) {
+      appData.screenPrice += +screen.price;
+      console.log("appData.screenPrice: ", appData.screenPrice);
+    }
+    for (let key of appData.services) {
+      appData.allServicePrices += +key.price;
+    }
   },
   getTitle: function (a) {
     let trimmedTitle = appData.title.trimStart();
@@ -39,34 +73,12 @@ const appData = {
       return "";
     }
 
-    return (
-      trimmedTitle.charAt(0).toUpperCase() + trimmedTitle.slice(1).toLowerCase()
-    );
-  },
-  getAllServicePrices: function () {
-    let sum = 0;
-    for (let i = 0; i < 2; i++) {
-      let price = 0;
-      if (i === 0) {
-        appData.service1 = prompt(
-          "Какой дополнительный тип услуги нужен?",
-          "Простые",
-        ).trim();
-      } else if (i === 1) {
-        appData.service2 = prompt(
-          "Какой дополнительный тип услуги нужен?",
-          "Сложные",
-        ).trim();
-      }
-      do {
-        price = prompt("Сколько это будет стоить?").trim();
-      } while (!appData.isNumber(price));
-      sum += +price;
-    }
-    return sum;
+    appData.title =
+      trimmedTitle.charAt(0).toUpperCase() +
+      trimmedTitle.slice(1).toLowerCase();
   },
   getFullPrice: function (a, b) {
-    return +a + b;
+    appData.fullPrice = +a + b;
   },
   getRollbackMessage: function (price) {
     if (price >= 30000) {
@@ -80,48 +92,16 @@ const appData = {
     }
   },
   getServicePercentPrice: function () {
-    return Math.ceil(
+    appData.servicePercentPrice = Math.ceil(
       appData.fullPrice - appData.fullPrice * (appData.rollback / 100),
     );
   },
-  start: function () {
-    appData.asking();
-    appData.title = appData.getTitle(appData.title);
-    appData.allServicePrices = appData.getAllServicePrices();
-    appData.fullPrice = appData.getFullPrice(
-      appData.screenPrice,
-      appData.allServicePrices,
-    );
-    appData.servicePercentPrice = appData.getServicePercentPrice(
-      appData.fullPrice,
-    );
-    appData.logger();
-  },
+
   logger: function () {
     for (let key in appData) {
-      console.log(appData[key]);
+      console.log(`${appData[key]}: `, appData[key]);
     }
   },
 };
 
 appData.start();
-
-/* TODO
-1) Перенести все функции в объект (сделать их методами объекта) +
-
-2) Создать в объекте метод start и перенести в него вызов метода asking и
- переопределение свойств. Вне самого объекта запускаем только метод start 
- который в нужном порядке выполнит все действия. +
-
-3) Создать в объекте метод logger который будет выводить в консоль необходимую
- информацию. Данный метод запускаем в самом конце метода start (после того как 
- все расчеты уже были произведены) +
-
-4) Вывести в консоль из метода logger все свойства и методы объекта appData
- с помощью цикла for in +
-
-Таким образом вне объекта теперь должен быть только вызов метода start( ) +
-
-Поправить весь проект, ошибок в консоли быть не должно, а в консоль должна 
-выводится необходимая информация!  +
-*/
