@@ -117,7 +117,7 @@ const appData = {
             `Сколько будет стоить ${i + 1} экран "${name}"?`,
             20000,
           ).trim();
-          price = Number(price)
+          price = Number(price);
         } while (!appData.isNumber(price));
         return price;
       };
@@ -166,17 +166,24 @@ const appData = {
       );
 
       appData.services.push({ id: i + 1, name: name, price: price });
+      console.log("appData.services: ", appData.services);
     }
 
     appData.adaptive = confirm("Нужен ли адаптив на сайте?");
   },
   addPrices: function () {
-    for (let screen of appData.screens) {
-      appData.screenPrice += +screen.price;
-    }
-    for (let key of appData.services) {
-      appData.allServicePrices += +key.price;
-    }
+    // for (let screen of appData.screens) {
+    //   appData.screenPrice += +screen.price;
+    // }
+    appData.screenPrice = appData.screens.reduce((acc, item) => {
+      return acc + item.price;
+    }, 0);
+    // for (let key of appData.services) {
+    //   appData.allServicePrices += +key.price;
+    // }
+    appData.allServicePrices = appData.services.reduce((acc, item) => {
+      return acc + item.price;
+    }, 0);
   },
   getTitle: function () {
     let trimmedTitle = appData.title.trimStart();
