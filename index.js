@@ -13,7 +13,7 @@ const appData = {
   start: function () {
     appData.asking();
     appData.getValidInput(appData.title);
-    appData.getTitle(appData.title);
+    appData.getTitle();
     appData.addPrices();
     appData.getFullPrice(appData.screenPrice, appData.allServicePrices);
     appData.getServicePercentPrice(appData.fullPrice);
@@ -34,13 +34,11 @@ const appData = {
     return ifSimbolNotNum.test(input);
   },
   getValidInput: function (input) {
-    // let input;
-
     while (true) {
       input = prompt();
 
       // Для строковых полей: проверяем, что в строке нет «голых» цифр
-      if (input === "string") {
+      if (typeof input === "string") {
         if (/\d/.test(input)) {
           console.log(
             "Ошибка: здесь должен быть текст, а не цифры. Попробуйте ещё.",
@@ -49,7 +47,7 @@ const appData = {
         }
       }
       // Для числовых полей: проверяем, что ввод можно преобразовать в число
-      else if (input === "number") {
+      else if (typeof input === "number") {
         if (!/^\d+$/.test(input)) {
           console.log("Ошибка: здесь должно быть число. Попробуйте ещё.");
           continue;
@@ -69,10 +67,14 @@ const appData = {
           "     oooooIIIIIOOOoo-123",
         ).trim();
 
-        if (title === "") {
+        if (!title) {
           alert(
             "Название не может быть пустым. Пожалуйста, введите корректное название.",
           );
+          titleStr();
+          return;
+        } else if (!/\D+/.test(title)) {
+          alert("Ошибка: здесь должен быть текст, а не цифры. Попробуйте ещё.");
           titleStr();
           return;
         }
@@ -83,37 +85,87 @@ const appData = {
 
     for (let i = 0; i < 2; i++) {
       let name;
-      name = prompt(
-        "Какие типы экранов нужно разработать: простые, сложные или интерактивные?",
-        "простые",
-        "сложные",
+      const nameStr = () => {
+        do {
+          name = prompt(
+            `Какие типы экранов нужно разработать: простые, сложные или интерактивные? Тип ${i + 1} экрана:`,
+          ).trim();
+
+          if (!name) {
+            alert(
+              "Тип экрана не может быть пустым. Пожалуйста, введите корректное название.",
+            );
+            nameStr();
+            return;
+          } else if (!/\D+/.test(name)) {
+            alert(
+              "Ошибка: здесь должен быть текст, а не цифры. Попробуйте ещё.",
+            );
+            nameStr();
+            return;
+          }
+        } while (!name);
+        return name;
+      };
+      name = nameStr();
+      console.log(`Тип ${i + 1} экрана "${name}". Typeof: `, typeof name);
+
+      let price;
+      const priceNum = () => {
+        do {
+          price = prompt(
+            `Сколько будет стоить ${i + 1} экран "${name}"?`,
+            20000,
+          ).trim();
+          price = Number(price)
+        } while (!appData.isNumber(price));
+        return price;
+      };
+      price = priceNum();
+      console.log(
+        `Сколько будет стоить ${i + 1} экран "${name}"?: ${price} руб.`,
+        typeof price,
       );
 
-      let price = 0;
-      do {
-        price = +prompt(
-          "Сколько будет стоить данная работа?",
-          20000,
-          10000,
-        ).trim();
-      } while (!appData.isNumber(price));
+      appData.screens.push({
+        id: i + 1,
+        name: name,
+        price: price,
+      });
 
-      appData.screens.push({ id: i, name: name, price: price });
+      console.log("appData.screens: ", appData.screens);
     }
 
     for (let i = 0; i < 2; i++) {
-      let name = prompt(
-        "Какой дополнительный тип услуги нужен?",
-        "Простые",
-        "Сложные",
-      ).trim();
-      let price = 0;
-
+      let name;
       do {
-        price = prompt("Сколько это будет стоить?", 1000, 2000).trim();
-      } while (!appData.isNumber(price));
+        name = prompt("Какой дополнительный тип услуги нужен?").trim();
 
-      appData.services.push({ id: i, name: name, price: price });
+        if (!name) {
+          alert("Название услуги не может быть пустым.");
+        } else if (/\d/.test(name)) {
+          alert("Ошибка: название услуги не должно содержать цифры.");
+          name = "";
+        }
+      } while (!name);
+      console.log(
+        `Какой дополнительный тип услуги нужен: ${name}. Typeof: `,
+        typeof name,
+      );
+
+      let price;
+      do {
+        price = +prompt("Сколько это будет стоить?").trim();
+        if (!appData.isNumber(price)) {
+          alert("Ошибка: цена должна быть числом.");
+        }
+      } while (!appData.isNumber(price));
+      console.log(
+        `Стоимость ${i + 1} услуги "${name}: ${price} руб. Typeof `,
+        typeof price,
+      );
+
+      appData.services.push({ id: i + 1, name: name, price: price });
     }
 
     appData.adaptive = confirm("Нужен ли адаптив на сайте?");
@@ -161,7 +213,7 @@ const appData = {
       if (typeof appData[key] != "function") {
         if (key === "title") {
           console.log(
-            `Название сохранено: ${appData.title}, `,
+            `Как называется ваш проект? ${appData.title}, `,
             typeof appData.title,
           );
         } else {
@@ -169,6 +221,7 @@ const appData = {
         }
       }
     }
+    console.log("Typeof array ", Array.isArray(appData.screens));
   },
 };
 
