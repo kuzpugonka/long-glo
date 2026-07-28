@@ -3,6 +3,11 @@
 const title = document.getElementsByTagName('h1')[0].textContent
 // console.log('title: ', title);
 
+const btnStart = document.getElementsByClassName('handler_btn')[0].textContent
+const btnReset = document.getElementsByClassName('handler_btn')[1].textContent
+console.log('btnStart: ', btnStart);
+console.log('btnReset: ', btnReset);
+
 const appData = {
   title: "",
   screens: [],
