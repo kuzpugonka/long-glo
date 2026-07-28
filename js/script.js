@@ -25,12 +25,20 @@ const elemItemsNumber = Array.from(
 // console.log("Typeof array ", Array.isArray(elemItemsPercent));
 // console.log("Typeof array ", Array.isArray(elemItemsNumber));
 
-const inputRange =
-  document.querySelector(".rollback input[type='range']")
+const inputRange = document.querySelector(".rollback input[type='range']");
 // console.log("inputRange: ", inputRange);
 
-const spanValue = document.querySelector('.rollback  .range-value')
-console.log('spanValue: ', spanValue);
+const spanValue = document.querySelector(".rollback  .range-value");
+// console.log('spanValue: ', spanValue);
+
+const parentElement = document.querySelector(".main-total__items");
+const inputTotal = Array.from(
+  parentElement.getElementsByClassName("total-input"),
+).forEach((input) => {
+  console.log(input);
+});
+
+console.log("inputTotal: ", inputTotal);
 
 const appData = {
   title: "",
