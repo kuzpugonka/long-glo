@@ -25,7 +25,9 @@ const elemItemsNumber = Array.from(
 // console.log("Typeof array ", Array.isArray(elemItemsPercent));
 // console.log("Typeof array ", Array.isArray(elemItemsNumber));
 
-
+const inputRange =
+  document.querySelector(".rollback input[type='range']")
+console.log("inputRange: ", inputRange);
 
 const appData = {
   title: "",
