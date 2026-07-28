@@ -1,15 +1,31 @@
 "use strict";
 
-const title = document.getElementsByTagName('h1')[0].textContent
+const title = document.getElementsByTagName("h1")[0].textContent;
 // console.log('title: ', title);
 
-const btnStart = document.getElementsByClassName('handler_btn')[0].textContent
-const btnReset = document.getElementsByClassName('handler_btn')[1].textContent
+const btnStart = document.getElementsByClassName("handler_btn")[0].textContent;
+const btnReset = document.getElementsByClassName("handler_btn")[1].textContent;
 // console.log('btnStart: ', btnStart);
 // console.log('btnReset: ', btnReset);
 
-const btnScreen = document.querySelector('.screen-btn').textContent
-console.log('btnScreen: ', btnScreen);
+const btnScreen = document.querySelector(".screen-btn").textContent;
+// console.log("btnScreen: ", btnScreen);
+
+const elemItems = Array.from(document.querySelectorAll(".other-items"));
+const elemItemsPercent = Array.from(
+  document.querySelectorAll(".other-items.percent"),
+);
+const elemItemsNumber = Array.from(
+  document.querySelectorAll(".other-items.number "),
+);
+// console.log("elemItems: ", elemItems);
+// console.log("elemItemsPercent: ", elemItemsPercent);
+// console.log("elemItemsNumber: ", elemItemsNumber);
+// console.log("Typeof array ", Array.isArray(elemItems));
+// console.log("Typeof array ", Array.isArray(elemItemsPercent));
+// console.log("Typeof array ", Array.isArray(elemItemsNumber));
+
+
 
 const appData = {
   title: "",
