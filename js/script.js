@@ -27,7 +27,10 @@ const elemItemsNumber = Array.from(
 
 const inputRange =
   document.querySelector(".rollback input[type='range']")
-console.log("inputRange: ", inputRange);
+// console.log("inputRange: ", inputRange);
+
+const spanValue = document.querySelector('.rollback  .range-value')
+console.log('spanValue: ', spanValue);
 
 const appData = {
   title: "",
