@@ -5,8 +5,11 @@ const title = document.getElementsByTagName('h1')[0].textContent
 
 const btnStart = document.getElementsByClassName('handler_btn')[0].textContent
 const btnReset = document.getElementsByClassName('handler_btn')[1].textContent
-console.log('btnStart: ', btnStart);
-console.log('btnReset: ', btnReset);
+// console.log('btnStart: ', btnStart);
+// console.log('btnReset: ', btnReset);
+
+const btnScreen = document.querySelector('.screen-btn').textContent
+console.log('btnScreen: ', btnScreen);
 
 const appData = {
   title: "",
