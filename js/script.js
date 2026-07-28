@@ -34,11 +34,13 @@ const spanValue = document.querySelector(".rollback  .range-value");
 const parentElement = document.querySelector(".main-total__items");
 const inputTotal = Array.from(
   parentElement.getElementsByClassName("total-input"),
-).forEach((input) => {
+);
+inputTotal.forEach((input) => {
   console.log(input);
 });
 
-console.log("inputTotal: ", inputTotal);
+let screens = document.querySelectorAll(".screen");
+// console.log("screens: ", screens);
 
 const appData = {
   title: "",
