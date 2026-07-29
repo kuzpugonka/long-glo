@@ -1,47 +1,5 @@
 "use strict";
 
-const title = document.getElementsByTagName("h1")[0].textContent;
-// console.log('title: ', title);
-
-const btnStart = document.getElementsByClassName("handler_btn")[0].textContent;
-const btnReset = document.getElementsByClassName("handler_btn")[1].textContent;
-// console.log('btnStart: ', btnStart);
-// console.log('btnReset: ', btnReset);
-
-const btnScreen = document.querySelector(".screen-btn").textContent;
-// console.log("btnScreen: ", btnScreen);
-
-const elemItems = Array.from(document.querySelectorAll(".other-items"));
-const elemItemsPercent = Array.from(
-  document.querySelectorAll(".other-items.percent"),
-);
-const elemItemsNumber = Array.from(
-  document.querySelectorAll(".other-items.number "),
-);
-// console.log("elemItems: ", elemItems);
-// console.log("elemItemsPercent: ", elemItemsPercent);
-// console.log("elemItemsNumber: ", elemItemsNumber);
-// console.log("Typeof array ", Array.isArray(elemItems));
-// console.log("Typeof array ", Array.isArray(elemItemsPercent));
-// console.log("Typeof array ", Array.isArray(elemItemsNumber));
-
-const inputRange = document.querySelector(".rollback input[type='range']");
-// console.log("inputRange: ", inputRange);
-
-const spanValue = document.querySelector(".rollback  .range-value");
-// console.log('spanValue: ', spanValue);
-
-const parentElement = document.querySelector(".main-total__items");
-const inputTotal = Array.from(
-  parentElement.getElementsByClassName("total-input"),
-);
-inputTotal.forEach((input) => {
-  console.log(input);
-});
-
-let screens = document.querySelectorAll(".screen");
-// console.log("screens: ", screens);
-
 const appData = {
   title: "",
   screens: [],
@@ -52,6 +10,26 @@ const appData = {
   fullPrice: 0,
   servicePercentPrice: 0,
   services: [],
+  titleHTML: document.getElementsByTagName("h1")[0].textContent,
+  btnStartHTML: document.getElementsByClassName("handler_btn")[0].textContent,
+  btnResetHTML: document.getElementsByClassName("handler_btn")[1].textContent,
+  btnScreenHTML: document.querySelector(".screen-btn").textContent,
+  itemsHTML: Array.from(document.querySelectorAll(".other-items")),
+  itemsPercentHTML: Array.from(
+    document.querySelectorAll(".other-items.percent"),
+  ),
+  itemsNumberHTML: Array.from(
+    document.querySelectorAll(".other-items.number "),
+  ),
+  inputRangeHTML: document.querySelector(".rollback input[type='range']"),
+  spanValueHTML: document.querySelector(".rollback  .range-value"),
+  parentForInputTotalHTML: document.querySelector(".main-total__items"),
+  inputTotalHTML: Array.from(
+    parentForInputTotalHTML.getElementsByClassName("total-input"),
+  ).forEach((input) => {
+    console.log(input);
+  }),
+  screensHTML: document.querySelectorAll(".screen"),
   start: function () {
     appData.asking();
     appData.getValidInput(appData.title);
@@ -175,7 +153,7 @@ const appData = {
         price: price,
       });
 
-      console.log("appData.screens: ", appData.screens);
+      // console.log("appData.screens: ", appData.screens);
     }
 
     for (let i = 0; i < 2; i++) {
