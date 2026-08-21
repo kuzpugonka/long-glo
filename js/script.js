@@ -56,9 +56,8 @@ const appData = {
         // Обновляем свойство объекта
         appData.rollback = currentValue;
 
-        // Опционально: можно сразу пересчитать итог, если нужно показывать скидку в реальном времени
-        // appData.getServicePercentPrice();
-        // appData.showResult();
+        // Если нужно пересчитывать в реальном времени без нажатия кнопки:
+        // appData.calculateFinalPrice();
       });
     }
 
@@ -88,11 +87,6 @@ const appData = {
     appData.addScreens();
     appData.addServices();
     appData.addPrices();
-
-    // Теперь этот метод корректно использует appData.rollback
-    appData.getServicePercentPrice();
-    // appData.logger();
-
     appData.showResult();
   },
   showResult: function () {
@@ -100,7 +94,10 @@ const appData = {
     totalCountOther.value =
       appData.servicePricesPercent + appData.servicePricesNumber;
     fullTotalCount.value = appData.fullPrice;
-
+    // Выводим стоимость с учетом отката в нужное поле
+    if (totalCountRollback) {
+      totalCountRollback.value = appData.priceWithRollback;
+    }
     // totalCountRollback.value = appData.servicePercentPrice;
   },
   validateScreens: function () {
@@ -110,15 +107,6 @@ const appData = {
     currentScreens.forEach((screen, index) => {
       const select = screen.querySelector("select");
       const input = screen.querySelector("input[type='number']");
-
-      console.log(`Экран #${index + 1}:`, {
-        selectValid: select ? select.selectedIndex > 0 : false,
-        inputValid: input
-          ? !isNaN(parseFloat(input.value)) && parseFloat(input.value) > 0
-          : false,
-        selectValue: select ? select.value : null,
-        inputValue: input ? input.value : null,
-      });
 
       // Проверка: выбран ли не пустой option (обычно у первого option value="")
       // И введено ли число больше 0
@@ -212,29 +200,35 @@ const appData = {
     // console.log(appData);
   },
   addPrices: function () {
-    // for (let screen of appData.screens) {
-    //   appData.screenPrice += +screen.price;
-    // }
-    appData.screenPrice = appData.screens.reduce((acc, item) => {
-      return acc + item.price;
-    }, 0);
+    // 1. Считаем стоимость экранов
+    appData.screenPrice = appData.screens.reduce(
+      (acc, item) => acc + item.price,
+      0,
+    );
 
+    // 2. Считаем услуги фиксированной стоимостью
+    appData.servicePricesNumber = 0; //защита от удвоения суммы
     for (let key in appData.servicesNumber) {
       appData.servicePricesNumber += appData.servicesNumber[key];
     }
-    // appData.allServicePrices = appData.services.reduce((acc, item) => {
-    //   return acc + item.price;
-    // }, 0);
 
+    // 3. Считаем услуги в процентах от стоимости экранов
+    appData.servicePricesPercent = 0; //защита от удвоения суммы
     for (let key in appData.servicesPercent) {
       appData.servicePricesPercent +=
         appData.screenPrice * (appData.servicesPercent[key] / 100);
     }
 
+    // 4. Считаем полную стоимость (до скидки/отката)
     appData.fullPrice =
-      +appData.screenPrice +
+      appData.screenPrice +
       appData.servicePricesNumber +
       appData.servicePricesPercent;
+
+    // --- НОВАЯ ЛОГИКА: Расчет стоимости с учетом отката посредника ---
+    // Формула: Полная цена - (Полная цена * Откат / 100)
+    const discountAmount = (appData.fullPrice * appData.rollback) / 100;
+    appData.priceWithRollback = Math.ceil(appData.fullPrice - discountAmount);
   },
   getRollbackMessage: function (price) {
     if (price >= 30000) {
