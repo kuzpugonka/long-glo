@@ -24,7 +24,7 @@ const appData = {
   screens: [],
   screenPrice: 0,
   adaptive: true,
-  rollback: 10, // Начальное значение по умолчанию
+  rollback: 0, // Начальное значение по умолчанию
   servicePricesPercent: 0,
   servicePricesNumber: 0,
   fullPrice: 0,
@@ -36,7 +36,7 @@ const appData = {
     this.addTitle();
 
     // Добавляем валидацию при старте (на случай, если уже есть данные)
-    validateScreens();
+    appData.validateScreens();
 
     btnStart.addEventListener("click", appData.start);
     btnPlus.addEventListener("click", appData.addScreenBlock);
@@ -64,18 +64,20 @@ const appData = {
 
     // --- ПОДПИСЫВАЕМСЯ НА ИЗМЕНЕНИЯ В ПОЛЯХ ЭКРАНОВ ---
     // Так как блоки могут добавляться динамически, используем делегирование или перепривязку
-    document.body.addEventListener("change", (e) => {
+    // 1. Для инпутов используем input (мгновенно)
+    document.body.addEventListener("input", (e) => {
       const target = e.target;
-      if (target.closest(".screen")) {
-        validateScreens();
+      if (target.closest(".screen") && target.type === "number") {
+        appData.validateScreens();
       }
     });
 
     // Также проверяем при вводе чисел (на случай если change не сработает сразу)
-    document.body.addEventListener("input", (e) => {
+    // 2. Для селектов используем change (при потере фокуса) И input (мгновенно в новых браузерах)
+    document.body.addEventListener("change", (e) => {
       const target = e.target;
-      if (target.closest(".screen") && target.type === "number") {
-        validateScreens();
+      if (target.closest(".screen") && target.tagName === "SELECT") {
+        appData.validateScreens();
       }
     });
   },
@@ -105,9 +107,18 @@ const appData = {
     const currentScreens = document.querySelectorAll(".screen");
     let isValid = true;
 
-    currentScreens.forEach((screen) => {
+    currentScreens.forEach((screen, index) => {
       const select = screen.querySelector("select");
-      const input = screen.querySelector("input[type='number']"); // Уточняем тип input
+      const input = screen.querySelector("input[type='number']");
+
+      console.log(`Экран #${index + 1}:`, {
+        selectValid: select ? select.selectedIndex > 0 : false,
+        inputValid: input
+          ? !isNaN(parseFloat(input.value)) && parseFloat(input.value) > 0
+          : false,
+        selectValue: select ? select.value : null,
+        inputValue: input ? input.value : null,
+      });
 
       // Проверка: выбран ли не пустой option (обычно у первого option value="")
       // И введено ли число больше 0
@@ -116,9 +127,13 @@ const appData = {
         return;
       }
 
-      const isSelectValid = select.value !== "" && select.value !== null;
-      const isInputValid =
-        input.value.trim() !== "" && parseFloat(input.value) > 0;
+      // ИСПРАВЛЕНИЕ 1: Проверяем selectedIndex > 0.
+      // Это значит, что выбран любой пункт, кроме первого (который обычно "Выберите...").
+      const isSelectValid = select.selectedIndex > 0;
+
+      // ИСПРАВЛЕНИЕ 2: Проверка input. Используем parseFloat, чтобы отсечь пробелы и нечисловые значения.
+      const inputValue = parseFloat(input.value);
+      const isInputValid = !isNaN(inputValue) && inputValue > 0;
 
       if (!isSelectValid || !isInputValid) {
         isValid = false;
@@ -165,14 +180,14 @@ const appData = {
     const newSelect = cloneScreen.querySelector("select");
     const newInput = cloneScreen.querySelector("input");
 
-    if (newSelect) newSelect.selectedIndex = 0; // Сброс на первый пункт (обычно пустой или "Выберите")
+    if (newSelect) newSelect.selectedIndex = 0; // Сброс на первый пункт
     if (newInput) newInput.value = "";
 
     screens[screens.length - 1].after(cloneScreen);
 
     // Пересчитываем список экранов и сразу проверяем валидность
     screens = document.querySelectorAll(".screen");
-    validateScreens();
+    appData.validateScreens();
   },
   addServices: function () {
     itemsPercent.forEach(function (item) {
@@ -234,7 +249,7 @@ const appData = {
   },
   getServicePercentPrice: function () {
     appData.servicePercentPrice = Math.ceil(
-      appData.fullPrice - (appData.fullPrice * appData.rollback / 100)
+      appData.fullPrice - (appData.fullPrice * appData.rollback) / 100,
     );
   },
 
