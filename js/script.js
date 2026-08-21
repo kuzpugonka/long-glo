@@ -34,8 +34,29 @@ const appData = {
 
   init: function () {
     this.addTitle();
+
+    // Добавляем валидацию при старте (на случай, если уже есть данные)
+    validateScreens();
+
     btnStart.addEventListener("click", appData.start);
     btnPlus.addEventListener("click", appData.addScreenBlock);
+
+    // --- ПОДПИСЫВАЕМСЯ НА ИЗМЕНЕНИЯ В ПОЛЯХ ЭКРАНОВ ---
+    // Так как блоки могут добавляться динамически, используем делегирование или перепривязку
+    document.body.addEventListener("change", (e) => {
+      const target = e.target;
+      if (target.closest(".screen")) {
+        validateScreens();
+      }
+    });
+
+    // Также проверяем при вводе чисел (на случай если change не сработает сразу)
+    document.body.addEventListener("input", (e) => {
+      const target = e.target;
+      if (target.closest(".screen") && target.type === "number") {
+        validateScreens();
+      }
+    });
   },
   addTitle: function () {
     document.title = title.textContent;
@@ -46,39 +67,88 @@ const appData = {
 
     appData.addPrices();
     // appData.getServicePercentPrice(appData.fullPrice);
-
     // appData.logger();
-    
 
     appData.showResult();
   },
-
   showResult: function () {
     total.value = appData.screenPrice;
     totalCountOther.value =
       appData.servicePricesPercent + appData.servicePricesNumber;
     fullTotalCount.value = appData.fullPrice;
   },
+  validateScreens: function () {
+    const currentScreens = document.querySelectorAll(".screen");
+    let isValid = true;
+
+    currentScreens.forEach((screen) => {
+      const select = screen.querySelector("select");
+      const input = screen.querySelector("input[type='number']"); // Уточняем тип input
+
+      // Проверка: выбран ли не пустой option (обычно у первого option value="")
+      // И введено ли число больше 0
+      if (!select || !input) {
+        isValid = false;
+        return;
+      }
+
+      const isSelectValid = select.value !== "" && select.value !== null;
+      const isInputValid =
+        input.value.trim() !== "" && parseFloat(input.value) > 0;
+
+      if (!isSelectValid || !isInputValid) {
+        isValid = false;
+      }
+    });
+
+    // Применяем состояние кнопки
+    btnStart.disabled = !isValid;
+
+    if (btnStart.disabled) {
+      btnStart.style.opacity = "0.5";
+      btnStart.style.cursor = "not-allowed";
+    } else {
+      btnStart.style.opacity = "1";
+      btnStart.style.cursor = "pointer";
+    }
+
+    return isValid;
+  },
   addScreens: function () {
     screens = document.querySelectorAll(".screen");
+    appData.screens = []; // Очищаем массив перед пересчетом
 
     screens.forEach(function (screen, index) {
       const select = screen.querySelector("select");
       const input = screen.querySelector("input");
+
+      // Защита от ошибок, если полей нет
+      if (!select || !input) return;
+
       const selectName = select.options[select.selectedIndex].textContent;
 
       appData.screens.push({
         id: index + 1,
         name: selectName,
-        price: +select.value * +input.value,
+        price: (+select.value || 0) * (+input.value || 0),
       });
     });
-    // console.log("appData.screens: ", appData.screens);
   },
   addScreenBlock: function () {
     const cloneScreen = screens[0].cloneNode(true);
 
+    // ВАЖНО: При клонировании сбрасываем значения, чтобы новый блок считался пустым
+    const newSelect = cloneScreen.querySelector("select");
+    const newInput = cloneScreen.querySelector("input");
+
+    if (newSelect) newSelect.selectedIndex = 0; // Сброс на первый пункт (обычно пустой или "Выберите")
+    if (newInput) newInput.value = "";
+
     screens[screens.length - 1].after(cloneScreen);
+
+    // Пересчитываем список экранов и сразу проверяем валидность
+    screens = document.querySelectorAll(".screen");
+    validateScreens();
   },
   addServices: function () {
     itemsPercent.forEach(function (item) {
