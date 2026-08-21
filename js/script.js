@@ -24,7 +24,7 @@ const appData = {
   screens: [],
   screenPrice: 0,
   adaptive: true,
-  rollback: 10,
+  rollback: 10, // Начальное значение по умолчанию
   servicePricesPercent: 0,
   servicePricesNumber: 0,
   fullPrice: 0,
@@ -40,6 +40,27 @@ const appData = {
 
     btnStart.addEventListener("click", appData.start);
     btnPlus.addEventListener("click", appData.addScreenBlock);
+
+    // --- ОБРАБОТЧИК ДЛЯ ПОЛЗУНКА  ---
+    if (inputRange && inputRangeValue) {
+      // Устанавливаем начальное значение при загрузке
+      inputRangeValue.textContent = `${appData.rollback}%`;
+      inputRange.value = appData.rollback;
+
+      inputRange.addEventListener("input", (e) => {
+        const currentValue = parseInt(e.target.value, 10);
+
+        // Обновляем текст под ползунком
+        inputRangeValue.textContent = `${currentValue}%`;
+
+        // Обновляем свойство объекта
+        appData.rollback = currentValue;
+
+        // Опционально: можно сразу пересчитать итог, если нужно показывать скидку в реальном времени
+        // appData.getServicePercentPrice();
+        // appData.showResult();
+      });
+    }
 
     // --- ПОДПИСЫВАЕМСЯ НА ИЗМЕНЕНИЯ В ПОЛЯХ ЭКРАНОВ ---
     // Так как блоки могут добавляться динамически, используем делегирование или перепривязку
@@ -64,9 +85,10 @@ const appData = {
   start: function () {
     appData.addScreens();
     appData.addServices();
-
     appData.addPrices();
-    // appData.getServicePercentPrice(appData.fullPrice);
+
+    // Теперь этот метод корректно использует appData.rollback
+    appData.getServicePercentPrice();
     // appData.logger();
 
     appData.showResult();
@@ -76,6 +98,8 @@ const appData = {
     totalCountOther.value =
       appData.servicePricesPercent + appData.servicePricesNumber;
     fullTotalCount.value = appData.fullPrice;
+
+    // totalCountRollback.value = appData.servicePercentPrice;
   },
   validateScreens: function () {
     const currentScreens = document.querySelectorAll(".screen");
@@ -210,7 +234,7 @@ const appData = {
   },
   getServicePercentPrice: function () {
     appData.servicePercentPrice = Math.ceil(
-      appData.fullPrice - appData.fullPrice * (appData.rollback / 100),
+      appData.fullPrice - (appData.fullPrice * appData.rollback / 100)
     );
   },
 
