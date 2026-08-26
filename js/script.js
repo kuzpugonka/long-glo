@@ -242,17 +242,6 @@ const appData = {
     const discountAmount = (appData.fullPrice * appData.rollback) / 100;
     appData.priceWithRollback = Math.ceil(appData.fullPrice - discountAmount);
   },
-  getRollbackMessage: function (price) {
-    if (price >= 30000) {
-      return "Даем скидку в 10%";
-    } else if (price >= 15000 && price < 30000) {
-      return "Даем скидку в 5%";
-    } else if (price >= 0 && price < 15000) {
-      return "Скидка не предусмотрена";
-    } else {
-      return "Что-то пошло не так";
-    }
-  },
   getServicePercentPrice: function () {
     appData.servicePercentPrice = Math.ceil(
       appData.fullPrice - (appData.fullPrice * appData.rollback) / 100,
