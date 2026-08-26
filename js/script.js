@@ -3,7 +3,7 @@
 const title = document.getElementsByTagName("h1")[0];
 const btnPlus = document.querySelector(".screen-btn");
 const itemsPercent = document.querySelectorAll(".other-items.percent");
-const itemsNumber = document.querySelectorAll(".other-items.number ");
+const itemsNumber = document.querySelectorAll(".other-items.number");
 
 const inputRange = document.querySelector(".rollback input[type='range']");
 const inputRangeValue = document.querySelector(".rollback .range-value");
@@ -20,7 +20,6 @@ const totalCountRollback = document.getElementsByClassName("total-input")[4];
 let screens = document.querySelectorAll(".screen");
 
 const appData = {
-  // title: "",
   screens: [],
   screenPrice: 0,
   adaptive: true,
@@ -31,6 +30,7 @@ const appData = {
   servicePercentPrice: 0,
   servicesPercent: {}, //  значение price в %
   servicesNumber: {}, // готовая стоимость
+  totalScreensCount: 0, // новое свойство для общего количества экранов
 
   init: function () {
     this.addTitle();
@@ -94,6 +94,12 @@ const appData = {
     totalCountOther.value =
       appData.servicePricesPercent + appData.servicePricesNumber;
     fullTotalCount.value = appData.fullPrice;
+
+    // Вывод количества экранов
+    if (totalCount) {
+      totalCount.value = appData.totalScreensCount;
+    }
+
     // Выводим стоимость с учетом отката в нужное поле
     if (totalCountRollback) {
       totalCountRollback.value = appData.priceWithRollback;
@@ -144,6 +150,7 @@ const appData = {
   addScreens: function () {
     screens = document.querySelectorAll(".screen");
     appData.screens = []; // Очищаем массив перед пересчетом
+    appData.totalScreensCount = 0; // сбрасываем перед пересчётом
 
     screens.forEach(function (screen, index) {
       const select = screen.querySelector("select");
@@ -153,12 +160,17 @@ const appData = {
       if (!select || !input) return;
 
       const selectName = select.options[select.selectedIndex].textContent;
+      const countValue = parseFloat(input.value) || 0;
 
       appData.screens.push({
         id: index + 1,
         name: selectName,
-        price: (+select.value || 0) * (+input.value || 0),
+        price: (+select.value || 0) * countValue,
+        count: countValue, // добавила свойство count
       });
+
+      // суммируем количество экранов
+      appData.totalScreensCount += countValue;
     });
   },
   addScreenBlock: function () {
