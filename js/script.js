@@ -9,8 +9,9 @@ const itemsNumber = document.querySelectorAll(".other-items.number");
 const inputRange = document.querySelector(".rollback input[type='range']");
 const inputRangeValue = document.querySelector(".rollback .range-value");
 
-const btnStart = document.getElementsByClassName("handler_btn")[0];
-const btnReset = document.getElementsByClassName("handler_btn")[1];
+// Используем id вместо getElementsByClassName
+const btnStart = document.getElementById("start");
+const btnReset = document.getElementById("reset");
 
 const total = document.getElementsByClassName("total-input")[0];
 const totalCount = document.getElementsByClassName("total-input")[1];
@@ -50,6 +51,12 @@ const appData = {
       console.warn(
         "Элемент .handler_btn (кнопка «Старт») не найден — клик не будет обработан.",
       );
+    }
+
+    if (btnReset) {
+      btnReset.addEventListener("click", () => this.resetAll());
+    } else {
+      console.warn("Кнопка «Сброс» не найдена.");
     }
 
     if (btnPlus) {
@@ -94,8 +101,8 @@ const appData = {
     document.body.addEventListener("input", (e) => {
       const target = e.target;
       if (target.closest(".screen") && target.type === "number") {
-        appData.validateSingleInput(target);
-        appData.validateScreens();
+        this.validateSingleInput(target);
+        this.validateScreens();
       }
     });
 
@@ -104,7 +111,7 @@ const appData = {
     document.body.addEventListener("change", (e) => {
       const target = e.target;
       if (target.closest(".screen") && target.tagName === "SELECT") {
-        appData.validateScreens();
+        this.validateScreens();
       }
     });
   },
@@ -120,6 +127,10 @@ const appData = {
   },
 
   start: function () {
+    // Сначала валидируем, чтобы не считать при ошибках
+    const isValid = this.validateScreens();
+    if (!isValid) return;
+
     this.addScreens();
     this.addServices();
     this.addPrices();
@@ -128,6 +139,54 @@ const appData = {
     this.isCalculated = true;
     this.calculateRollbackPrice(); // считаем финальную цену с откатом
     this.showResult();
+
+    // Блокируем левую часть: все input[type=text] и select
+    const inputsText = document.querySelectorAll("input[type='text']");
+    const selects = document.querySelectorAll("select");
+
+    inputsText.forEach((el) => (el.disabled = true));
+    selects.forEach((el) => (el.disabled = true));
+
+    // Скрываем Старт, показываем Сброс
+    if (btnStart) btnStart.style.display = "none";
+    if (btnReset) btnReset.style.display = "inline-block";
+  },
+
+  resetAll: function () {
+    // Разблокируем поля
+    const inputsText = document.querySelectorAll("input[type='text']");
+    const selects = document.querySelectorAll("select");
+
+    inputsText.forEach((el) => (el.disabled = false));
+    selects.forEach((el) => (el.disabled = false));
+
+    // Показываем Старт, скрываем Сброс
+    if (btnStart) btnStart.style.display = "inline-block";
+    if (btnReset) btnReset.style.display = "none";
+
+    // Сбрасываем состояние
+    this.isCalculated = false;
+    this.priceWithRollback = 0;
+    this.fullPrice = 0;
+    this.screenPrice = 0;
+    this.servicePricesPercent = 0;
+    this.servicePricesNumber = 0;
+    this.totalScreensCount = 0;
+    this.screens = [];
+
+    // Очищаем итоговые поля
+    if (total) total.value = "";
+    if (totalCountOther) totalCountOther.value = "";
+    if (fullTotalCount) fullTotalCount.value = "";
+    if (totalCount) totalCount.value = "";
+    if (totalCountRollback) totalCountRollback.value = "";
+
+    // Убираем подсветку ошибок
+    const invalidInputs = document.querySelectorAll(".invalid-input");
+    invalidInputs.forEach((el) => el.classList.remove("invalid-input"));
+
+    // Пересчитываем валидность (чтобы кнопка Старт снова могла стать активной)
+    this.validateScreens();
   },
 
   calculateRollbackPrice: function () {
@@ -267,7 +326,7 @@ const appData = {
 
     // Пересчитываем список экранов и сразу проверяем валидность
     screens = document.querySelectorAll(".screen");
-    appData.validateScreens();
+    this.validateScreens();
   },
 
   addServices: function () {
@@ -325,7 +384,7 @@ const appData = {
         console.log(`${key}:  ${this[key]}`);
       }
     }
-    console.log("Typeof array ", Array.isArray(appData.screens));
+    console.log("Typeof array ", Array.isArray(this.screens));
   },
 };
 
