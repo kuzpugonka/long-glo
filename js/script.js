@@ -20,6 +20,9 @@ const totalCountRollback = document.getElementsByClassName("total-input")[4];
 
 let screens = document.querySelectorAll(".screen");
 
+// Регулярка для строгого числа: опциональный минус, цифры, опционально точка и цифры
+const numberRegex = /^-?\d+(\.\d+)?$/;
+
 const appData = {
   screens: [],
   screenPrice: 0,
@@ -42,7 +45,6 @@ const appData = {
 
     // Безопасная подписка на события: проверяем наличие элемента перед addEventListener
     if (btnStart) {
-      // Стрелочная функция в обработчике
       btnStart.addEventListener("click", () => this.start());
     } else {
       console.warn(
@@ -51,7 +53,6 @@ const appData = {
     }
 
     if (btnPlus) {
-      // Стрелочная функция в обработчике
       btnPlus.addEventListener("click", () => this.addScreenBlock());
     } else {
       console.warn(
@@ -65,7 +66,6 @@ const appData = {
       inputRangeValue.textContent = `${this.rollback}%`;
       inputRange.value = this.rollback;
 
-      // Стрелочная функция для input
       inputRange.addEventListener("input", (e) => {
         const currentValue = parseInt(e.target.value, 10);
         if (isNaN(currentValue)) return; // защита от некорректных значений
@@ -94,7 +94,8 @@ const appData = {
     document.body.addEventListener("input", (e) => {
       const target = e.target;
       if (target.closest(".screen") && target.type === "number") {
-        appData.validateScreens(); // используем appData, потому что this здесь — window
+        appData.validateSingleInput(target);
+        appData.validateScreens();
       }
     });
 
@@ -103,7 +104,7 @@ const appData = {
     document.body.addEventListener("change", (e) => {
       const target = e.target;
       if (target.closest(".screen") && target.tagName === "SELECT") {
-        appData.validateScreens(); // используем appData, потому что this здесь — window
+        appData.validateScreens();
       }
     });
   },
@@ -155,6 +156,18 @@ const appData = {
     }
   },
 
+  validateSingleInput: function (input) {
+    // Валидация одного инпута (для мгновенной подсветки)
+    const rawValue = input.value.trim();
+    const isValid = numberRegex.test(rawValue) && parseFloat(rawValue) > 0;
+
+    if (!isValid) {
+      input.classList.add("invalid-input");
+    } else {
+      input.classList.remove("invalid-input");
+    }
+  },
+
   validateScreens: function () {
     const currentScreens = document.querySelectorAll(".screen");
     let isValid = true;
@@ -171,14 +184,18 @@ const appData = {
 
       const isSelectValid = select.selectedIndex > 0;
 
-      // Получаем значение как строку
+      // Вызываем единую валидацию инпута — она сама поставит/уберёт .invalid-input
       const rawValue = input.value.trim();
-
-      // Регулярка: опциональный минус, цифры, опционально точка и ещё цифры
-      const numberRegex = /^-?\d+(\.\d+)?$/;
 
       const isInputValid =
         numberRegex.test(rawValue) && parseFloat(rawValue) > 0;
+
+      // Подсветка инпута
+      if (!isInputValid) {
+        input.classList.add("invalid-input");
+      } else {
+        input.classList.remove("invalid-input");
+      }
 
       if (!isSelectValid || !isInputValid) {
         isValid = false;
@@ -207,7 +224,14 @@ const appData = {
       // Защита от ошибок, если полей нет
       if (!select || !input) return;
 
-      const countValue = parseFloat(input.value) || 0;
+      const rawValue = input.value.trim();
+
+      // Если невалидно — считаем как 0, но класс уже поставлен в validateScreens
+      const countValue = numberRegex.test(rawValue) ? parseFloat(rawValue) : 0;
+
+      if (countValue <= 0) {
+        return; // не добавляем в расчёт
+      }
 
       this.screens.push({
         id: index + 1,
@@ -234,7 +258,10 @@ const appData = {
     const newInput = cloneScreen.querySelector("input");
 
     if (newSelect) newSelect.selectedIndex = 0; // Сброс на первый пункт
-    if (newInput) newInput.value = "";
+    if (newInput) {
+      newInput.value = "";
+      newInput.classList.remove("invalid-input"); // убираем подсветку у нового поля
+    }
 
     screens[screens.length - 1].after(cloneScreen);
 

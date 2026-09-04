@@ -1,39 +1,53 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
-    color: black;
-    background-color: #F0FFFF;
+  font-family: "Montserrat", sans-serif;
+  color: black;
+  background-color: #f0ffff;
 }
 
 .container {
-    width: 97%;
-    max-width: 1140px;
-    margin: 0 auto;
+  width: 97%;
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.invalid-input {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5;
+  color: #721c24;
+}
+
+/* Опционально: подсказка ошибки рядом с полем */
+.input-error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
 }
 
 @media (max-width: 1200px) {
-    .container {
-        max-width: 900px;
-    }
+  .container {
+    max-width: 900px;
+  }
 }
 
 @media (max-width: 991px) {
-    .container {
-        max-width: 700px;
-    }
+  .container {
+    max-width: 700px;
+  }
 }
 
 @media (max-width: 768px) {
-    .container {
-        max-width: 500px;
-    }
+  .container {
+    max-width: 500px;
+  }
 }
 
 @media (max-width: 576px) {
-    .container {
-        max-width: 300px;
-    }
+  .container {
+    max-width: 300px;
+  }
 }
