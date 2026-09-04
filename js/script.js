@@ -1,5 +1,6 @@
 "use strict";
 
+// Получаем элементы и сразу проверяем, что они существуют
 const title = document.getElementsByTagName("h1")[0];
 const btnPlus = document.querySelector(".screen-btn");
 const itemsPercent = document.querySelectorAll(".other-items.percent");
@@ -39,21 +40,35 @@ const appData = {
     // Добавляем валидацию при старте (на случай, если уже есть данные)
     this.validateScreens();
 
+    // Безопасная подписка на события: проверяем наличие элемента перед addEventListener
     if (btnStart) {
+      // Стрелочная функция в обработчике
       btnStart.addEventListener("click", () => this.start());
-    }
-    if (btnPlus) {
-      btnPlus.addEventListener("click", () => this.addScreenBlock());
+    } else {
+      console.warn(
+        "Элемент .handler_btn (кнопка «Старт») не найден — клик не будет обработан.",
+      );
     }
 
-    // Ползунок
+    if (btnPlus) {
+      // Стрелочная функция в обработчике
+      btnPlus.addEventListener("click", () => this.addScreenBlock());
+    } else {
+      console.warn(
+        "Элемент .screen-btn (кнопка «+ экран») не найден — добавление экрана недоступно.",
+      );
+    }
+
+    // Ползунок: только если есть и сам ползунок, и элемент для вывода значения
     if (inputRange && inputRangeValue) {
       // Устанавливаем начальное значение при загрузке
       inputRangeValue.textContent = `${this.rollback}%`;
       inputRange.value = this.rollback;
 
+      // Стрелочная функция для input
       inputRange.addEventListener("input", (e) => {
         const currentValue = parseInt(e.target.value, 10);
+        if (isNaN(currentValue)) return; // защита от некорректных значений
 
         // Обновляем текст под ползунком
         inputRangeValue.textContent = `${currentValue}%`;
@@ -67,6 +82,11 @@ const appData = {
           this.showResult();
         }
       });
+    } else if (inputRange || inputRangeValue) {
+      // Если один из двух элементов отсутствует — логируем предупреждение
+      console.warn(
+        "Ползунок или его индикатор значения не найдены — функционал отката не будет работать.",
+      );
     }
 
     // Делегирование событий для полей экранов
@@ -87,11 +107,17 @@ const appData = {
       }
     });
   },
+
   addTitle: function () {
     if (title) {
       document.title = title.textContent;
+    } else {
+      console.warn(
+        "Заголовок <h1> не найден — document.title не будет обновлён.",
+      );
     }
   },
+
   start: function () {
     this.addScreens();
     this.addServices();
@@ -102,11 +128,14 @@ const appData = {
     this.calculateRollbackPrice(); // считаем финальную цену с откатом
     this.showResult();
   },
+
   calculateRollbackPrice: function () {
     const discountAmount = (this.fullPrice * this.rollback) / 100;
     this.priceWithRollback = Math.ceil(this.fullPrice - discountAmount);
   },
+
   showResult: function () {
+    // Заполняем только те поля, которые реально существуют
     if (total) total.value = this.screenPrice;
     if (totalCountOther)
       totalCountOther.value =
@@ -125,6 +154,7 @@ const appData = {
         : "";
     }
   },
+
   validateScreens: function () {
     const currentScreens = document.querySelectorAll(".screen");
     let isValid = true;
@@ -133,22 +163,29 @@ const appData = {
       const select = screen.querySelector("select");
       const input = screen.querySelector("input[type='number']");
 
-      // Проверка: выбран ли не пустой option (обычно у первого option value="")
-      // И введено ли число больше 0
+      // Если в блоке экрана нет обязательных полей — считаем его невалидным
       if (!select || !input) {
         isValid = false;
         return;
       }
 
       const isSelectValid = select.selectedIndex > 0;
-      const inputValue = parseFloat(input.value);
-      const isInputValid = !isNaN(inputValue) && inputValue > 0;
+
+      // Получаем значение как строку
+      const rawValue = input.value.trim();
+
+      // Регулярка: опциональный минус, цифры, опционально точка и ещё цифры
+      const numberRegex = /^-?\d+(\.\d+)?$/;
+
+      const isInputValid =
+        numberRegex.test(rawValue) && parseFloat(rawValue) > 0;
 
       if (!isSelectValid || !isInputValid) {
         isValid = false;
       }
     });
 
+    // Кнопка Start только если она существует
     if (btnStart) {
       btnStart.disabled = !isValid;
       btnStart.style.opacity = isValid ? "1" : "0.5";
@@ -157,6 +194,7 @@ const appData = {
 
     return isValid;
   },
+
   addScreens: function () {
     screens = document.querySelectorAll(".screen");
     this.screens = []; // Очищаем массив перед пересчетом
@@ -175,19 +213,23 @@ const appData = {
         id: index + 1,
         name: select.options[select.selectedIndex].textContent,
         price: (+select.value || 0) * countValue,
-        count: countValue, // добавила свойство count
+        count: countValue, // добавляем свойство count
       });
 
       // суммируем количество экранов
       this.totalScreensCount += countValue;
     });
   },
+
   addScreenBlock: function () {
-    if (screens.length === 0) return;
+    if (screens.length === 0) {
+      console.warn("Нет блоков .screen — невозможно клонировать новый.");
+      return;
+    }
 
     const cloneScreen = screens[0].cloneNode(true);
 
-    // ВАЖНО: При клонировании сбрасываем значения, чтобы новый блок считался пустым
+    // Cбрасываем значения, чтобы новый блок считался пустым
     const newSelect = cloneScreen.querySelector("select");
     const newInput = cloneScreen.querySelector("input");
 
@@ -200,13 +242,19 @@ const appData = {
     screens = document.querySelectorAll(".screen");
     appData.validateScreens();
   },
+
   addServices: function () {
+    // Очищаем объекты перед новым расчётом, чтобы снятые галочки не учитывались
+    this.servicesPercent = {};
+    this.servicesNumber = {};
+
     itemsPercent.forEach((item) => {
       const check = item.querySelector("input[type=checkbox]");
       const label = item.querySelector("label");
       const input = item.querySelector("input[type=text]");
 
-      if (check && check.checked) {
+      // Проверяем, что все элементы существуют и чекбокс отмечен
+      if (check && check.checked && label && input) {
         this.servicesPercent[label.textContent] = +input.value;
       }
     });
@@ -216,11 +264,12 @@ const appData = {
       const label = item.querySelector("label");
       const input = item.querySelector("input[type=text]");
 
-      if (check && check.checked) {
+      if (check && check.checked && label && input) {
         this.servicesNumber[label.textContent] = +input.value;
       }
     });
   },
+
   addPrices: function () {
     // 1. Считаем стоимость экранов
     this.screenPrice = this.screens.reduce((acc, item) => acc + item.price, 0);
