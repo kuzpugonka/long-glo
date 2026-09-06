@@ -117,6 +117,7 @@ const appData = {
 
     // Подключаем логику CMS-блока
     this.initCmsToggle();
+    this.initCmsSelectToggle();
   },
 
   // Новый метод: управление видимостью .hidden-cms-variants
@@ -189,6 +190,48 @@ const appData = {
     if (btnReset) btnReset.style.display = "inline-block";
   },
 
+  initCmsSelectToggle: function () {
+    const cmsBlock = document.querySelector(".hidden-cms-variants");
+
+    if (!cmsBlock) {
+      console.warn(
+        ".hidden-cms-variants не найден — логика select не подключится.",
+      );
+      return;
+    }
+
+    const cmsSelect = cmsBlock.querySelector("select");
+    const cmsInputBlock = cmsBlock.querySelector(".main-controls__input");
+
+    if (!cmsSelect) {
+      console.warn("select внутри .hidden-cms-variants не найден.");
+      return;
+    }
+
+    if (!cmsInputBlock) {
+      console.warn(
+        ".main-controls__input внутри .hidden-cms-variants не найден.",
+      );
+      return;
+    }
+
+    // Инициализация при загрузке
+    if (cmsSelect.value === "other") {
+      cmsInputBlock.style.display = "block";
+    } else {
+      cmsInputBlock.style.display = "none";
+    }
+
+    // Реакция на выбор
+    cmsSelect.addEventListener("change", () => {
+      if (cmsSelect.value === "other") {
+        cmsInputBlock.style.display = "block";
+      } else {
+        cmsInputBlock.style.display = "none";
+      }
+    });
+  },
+
   reset: function () {
     // 1. Сбрасываем свойства объекта к исходным значениям
     this.screens = [];
@@ -259,9 +302,17 @@ const appData = {
     if (btnStart) btnStart.style.display = "inline-block";
     if (btnReset) btnReset.style.display = "none";
 
-    // 10. Скрываем CMS-блок, если чекбокс снят
+    // 10. Скрываем CMS-блок и сбрасываем его внутренности
     const cmsBlock = document.querySelector(".hidden-cms-variants");
-    if (cmsBlock) cmsBlock.style.display = "none";
+    if (cmsBlock) {
+      cmsBlock.style.display = "none";
+
+      const cmsInputBlock = cmsBlock.querySelector(".main-controls__input");
+      if (cmsInputBlock) cmsInputBlock.style.display = "none";
+
+      const cmsSelect = cmsBlock.querySelector("select");
+      if (cmsSelect) cmsSelect.selectedIndex = 0;
+    }
 
     // 11. Пересчитываем валидность (кнопка Старт должна стать неактивной,
     //     т.к. поля очищены)
