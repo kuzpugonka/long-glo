@@ -48,9 +48,7 @@ const appData = {
     if (btnStart) {
       btnStart.addEventListener("click", () => this.start());
     } else {
-      console.warn(
-        "Элемент .handler_btn (кнопка «Старт») не найден — клик не будет обработан.",
-      );
+      console.warn("Кнопка «Старт» не найдена.");
     }
 
     if (btnReset) {
@@ -62,12 +60,10 @@ const appData = {
     if (btnPlus) {
       btnPlus.addEventListener("click", () => this.addScreenBlock());
     } else {
-      console.warn(
-        "Элемент .screen-btn (кнопка «+ экран») не найден — добавление экрана недоступно.",
-      );
+      console.warn("Кнопка «+ экран» не найдена.");
     }
 
-    // Ползунок: только если есть и сам ползунок, и элемент для вывода значения
+    // Ползунок отката
     if (inputRange && inputRangeValue) {
       // Устанавливаем начальное значение при загрузке
       inputRangeValue.textContent = `${this.rollback}%`;
@@ -125,81 +121,50 @@ const appData = {
     const cmsCheckbox = document.getElementById("cms-open");
     const cmsBlock = document.querySelector(".hidden-cms-variants");
 
-    if (!cmsCheckbox) {
-      console.warn("#cms-open не найден — логика CMS не подключится.");
-      return;
-    }
-
-    // Если блока нет — просто не показываем, но не ломаем скрипт
-    if (!cmsBlock) {
-      console.warn(
-        ".hidden-cms-variants не найден — блок не будет переключаться.",
-      );
+    if (!cmsCheckbox || !cmsBlock) {
+      if (!cmsCheckbox) console.warn("#cms-open не найден.");
+      if (!cmsBlock) console.warn(".hidden-cms-variants не найден.");
       return;
     }
 
     cmsCheckbox.addEventListener("change", () => {
-      if (cmsCheckbox.checked) {
-        cmsBlock.style.display = "flex";
-      } else {
-        cmsBlock.style.display = "none";
-      }
+      cmsBlock.style.display = cmsCheckbox.checked ? "flex" : "none";
     });
 
-    // Инициализация состояния при загрузке страницы
-    if (cmsCheckbox.checked) {
-      cmsBlock.style.display = "flex";
-    } else {
-      cmsBlock.style.display = "none";
-    }
+    cmsBlock.style.display = cmsCheckbox.checked ? "flex" : "none";
   },
 
   initCmsSelectToggle: function () {
     const cmsBlock = document.querySelector(".hidden-cms-variants");
 
-    if (!cmsBlock) {
-      console.warn(
-        ".hidden-cms-variants не найден — логика select не подключится.",
-      );
-      return;
-    }
+    if (!cmsBlock) return;
 
     const cmsSelect = cmsBlock.querySelector("select");
     const cmsInputBlock = cmsBlock.querySelector(".main-controls__input");
 
-    if (!cmsSelect) {
-      console.warn("select внутри .hidden-cms-variants не найден.");
-      return;
-    }
-
-    if (!cmsInputBlock) {
-      console.warn(
-        ".main-controls__input внутри .hidden-cms-variants не найден.",
-      );
+    if (!cmsSelect || !cmsInputBlock) {
+      if (!cmsSelect)
+        console.warn("select внутри .hidden-cms-variants не найден.");
+      if (!cmsInputBlock)
+        console.warn(
+          ".main-controls__input внутри .hidden-cms-variants не найден.",
+        );
       return;
     }
 
     // Инициализация при загрузке
-    if (cmsSelect.value === "other") {
-      cmsInputBlock.style.display = "block";
-    } else {
-      cmsInputBlock.style.display = "none";
-    }
+    const toggleInput = () => {
+      cmsInputBlock.style.display =
+        cmsSelect.value === "other" ? "block" : "none";
+    };
 
-    // Реакция на выбор
-    cmsSelect.addEventListener("change", () => {
-      if (cmsSelect.value === "other") {
-        cmsInputBlock.style.display = "block";
-      } else {
-        cmsInputBlock.style.display = "none";
-      }
-    });
+    toggleInput();
+    cmsSelect.addEventListener("change", toggleInput);
   },
 
   start: function () {
     // Сначала валидируем, чтобы не считать при ошибках
-    const isValid = this.validateScreens();
-    if (!isValid) return;
+    if (!this.validateScreens()) return;
 
     this.addScreens();
     this.addServices();
@@ -223,7 +188,7 @@ const appData = {
   },
 
   reset: function () {
-    // 1. Сбрасываем свойства объекта к исходным значениям
+    // 1. Сброс данных объекта
     this.screens = [];
     this.screenPrice = 0;
     this.servicePricesPercent = 0;
@@ -235,18 +200,18 @@ const appData = {
     this.priceWithRollback = 0;
     this.isCalculated = false;
 
-    // 2. Сбрасываем ползунок отката
+    // 2. Сброс ползунка отката
     this.rollback = 0;
     if (inputRange) inputRange.value = 0;
     if (inputRangeValue) inputRangeValue.textContent = "0%";
 
-    // 3. Удаляем все динамически добавленные блоки .screen (оставляем первый)
+    // 3. Удаление динамических блоков экранов (оставляем первый)
     screens = document.querySelectorAll(".screen");
     for (let i = screens.length - 1; i > 0; i--) {
       screens[i].remove();
     }
 
-    // 4. Очищаем значения в оставшемся (первом) блоке .screen
+    // 4. Очистка значения в оставшемся (первом) блоке .screen
     screens = document.querySelectorAll(".screen");
     screens.forEach((screen) => {
       const select = screen.querySelector("select");
@@ -264,24 +229,24 @@ const appData = {
       }
     });
 
-    // 5. Снимаем все чекбоксы услуг
+    // 5. Сброс всех чекбоксов (включая #cms-open)
     const allCheckboxes = document.querySelectorAll("input[type='checkbox']");
     allCheckboxes.forEach((cb) => (cb.checked = false));
 
-    // 6. Очищаем текстовые поля услуг
+    // 6. Очистка текстовых полей услуг
     const serviceInputs = document.querySelectorAll(
       ".other-items input[type='text']",
     );
     serviceInputs.forEach((el) => (el.value = ""));
 
-    // 7. Разблокируем все input[type=text] и select
+    // 7. Разблокировка полей
     const inputsText = document.querySelectorAll("input[type='text']");
     const selects = document.querySelectorAll("select");
 
     inputsText.forEach((el) => (el.disabled = false));
     selects.forEach((el) => (el.disabled = false));
 
-    // 8. Очищаем итоговые поля
+    // 8. Очистка итоговых полей
     if (total) total.value = "";
     if (totalCountOther) totalCountOther.value = "";
     if (fullTotalCount) fullTotalCount.value = "";
@@ -292,7 +257,7 @@ const appData = {
     if (btnStart) btnStart.style.display = "inline-block";
     if (btnReset) btnReset.style.display = "none";
 
-    // 10. Скрываем CMS-блок и сбрасываем его внутренности
+    // 10. Сброс CMS-блока
     const cmsBlock = document.querySelector(".hidden-cms-variants");
     if (cmsBlock) {
       cmsBlock.style.display = "none";
@@ -304,8 +269,7 @@ const appData = {
       if (cmsSelect) cmsSelect.selectedIndex = 0;
     }
 
-    // 11. Пересчитываем валидность (кнопка Старт должна стать неактивной,
-    //     т.к. поля очищены)
+    // 11. Валидация (кнопка Старт должна стать неактивной, пока поля пустые)
     this.validateScreens();
   },
 
@@ -340,11 +304,7 @@ const appData = {
     const rawValue = input.value.trim();
     const isValid = numberRegex.test(rawValue) && parseFloat(rawValue) > 0;
 
-    if (!isValid) {
-      input.classList.add("invalid-input");
-    } else {
-      input.classList.remove("invalid-input");
-    }
+    input.classList.toggle("invalid-input", !isValid);
   },
 
   validateScreens: function () {
@@ -370,11 +330,7 @@ const appData = {
         numberRegex.test(rawValue) && parseFloat(rawValue) > 0;
 
       // Подсветка инпута
-      if (!isInputValid) {
-        input.classList.add("invalid-input");
-      } else {
-        input.classList.remove("invalid-input");
-      }
+      input.classList.toggle("invalid-input", !isInputValid);
 
       if (!isSelectValid || !isInputValid) {
         isValid = false;
@@ -418,9 +374,7 @@ const appData = {
       // Если невалидно — считаем как 0, но класс уже поставлен в validateScreens
       const countValue = numberRegex.test(rawValue) ? parseFloat(rawValue) : 0;
 
-      if (countValue <= 0) {
-        return; // не добавляем в расчёт
-      }
+      if (countValue <= 0) return; // не добавляем в расчёт
 
       this.screens.push({
         id: index + 1,
