@@ -120,8 +120,8 @@ const appData = {
     this.initCmsSelectToggle();
   },
 
-  // Новый метод: управление видимостью .hidden-cms-variants
   initCmsToggle: function () {
+    // Новый метод: управление видимостью .hidden-cms-variants
     const cmsCheckbox = document.getElementById("cms-open");
     const cmsBlock = document.querySelector(".hidden-cms-variants");
 
@@ -152,42 +152,6 @@ const appData = {
     } else {
       cmsBlock.style.display = "none";
     }
-  },
-
-  addTitle: function () {
-    if (title) {
-      document.title = title.textContent;
-    } else {
-      console.warn(
-        "Заголовок <h1> не найден — document.title не будет обновлён.",
-      );
-    }
-  },
-
-  start: function () {
-    // Сначала валидируем, чтобы не считать при ошибках
-    const isValid = this.validateScreens();
-    if (!isValid) return;
-
-    this.addScreens();
-    this.addServices();
-    this.addPrices();
-
-    // После расчёта кнопкой включаем режим «реального времени» для ползунка
-    this.isCalculated = true;
-    this.calculateRollbackPrice(); // считаем финальную цену с откатом
-    this.showResult();
-
-    // Блокируем все input[type=text] и select
-    const inputsText = document.querySelectorAll("input[type='text']");
-    const selects = document.querySelectorAll("select");
-
-    inputsText.forEach((el) => (el.disabled = true));
-    selects.forEach((el) => (el.disabled = true));
-
-    // Скрываем Старт, показываем Сброс
-    if (btnStart) btnStart.style.display = "none";
-    if (btnReset) btnReset.style.display = "inline-block";
   },
 
   initCmsSelectToggle: function () {
@@ -230,6 +194,32 @@ const appData = {
         cmsInputBlock.style.display = "none";
       }
     });
+  },
+
+  start: function () {
+    // Сначала валидируем, чтобы не считать при ошибках
+    const isValid = this.validateScreens();
+    if (!isValid) return;
+
+    this.addScreens();
+    this.addServices();
+    this.addPrices();
+
+    // После расчёта кнопкой включаем режим «реального времени» для ползунка
+    this.isCalculated = true;
+    this.calculateRollbackPrice(); // считаем финальную цену с откатом
+    this.showResult();
+
+    // Блокируем все input[type=text] и select
+    const inputsText = document.querySelectorAll("input[type='text']");
+    const selects = document.querySelectorAll("select");
+
+    inputsText.forEach((el) => (el.disabled = true));
+    selects.forEach((el) => (el.disabled = true));
+
+    // Скрываем Старт, показываем Сброс
+    if (btnStart) btnStart.style.display = "none";
+    if (btnReset) btnReset.style.display = "inline-block";
   },
 
   reset: function () {
@@ -401,6 +391,16 @@ const appData = {
     return isValid;
   },
 
+  addTitle: function () {
+    if (title) {
+      document.title = title.textContent;
+    } else {
+      console.warn(
+        "Заголовок <h1> не найден — document.title не будет обновлён.",
+      );
+    }
+  },
+
   addScreens: function () {
     screens = document.querySelectorAll(".screen");
     this.screens = []; // Очищаем массив перед пересчетом
@@ -460,18 +460,15 @@ const appData = {
   },
 
   addServices: function () {
-    // Очищаем объекты перед новым расчётом, чтобы снятые галочки не учитывались
     this.servicesPercent = {};
     this.servicesNumber = {};
 
     itemsPercent.forEach((item) => {
       const check = item.querySelector("input[type=checkbox]");
       const label = item.querySelector("label");
-      const input = item.querySelector("input[type=text]");
 
-      // Проверяем, что все элементы существуют и чекбокс отмечен
-      if (check && check.checked && label && input) {
-        this.servicesPercent[label.textContent] = +input.value;
+      if (check && check.checked && label) {
+        this.servicesPercent[label.textContent] = +check.value;
       }
     });
 
@@ -490,22 +487,24 @@ const appData = {
     // 1. Считаем стоимость экранов
     this.screenPrice = this.screens.reduce((acc, item) => acc + item.price, 0);
 
-    // 2. Считаем услуги фиксированной стоимостью
-    this.servicePricesNumber = 0; //защита от удвоения суммы
+    // 2. Считаем услуги с фиксированной стоимостью
+    this.servicePricesNumber = 0;
     for (const key in this.servicesNumber) {
       this.servicePricesNumber += this.servicesNumber[key];
     }
 
-    // 3. Считаем услуги в процентах от стоимости экранов
-    this.servicePricesPercent = 0; //защита от удвоения суммы
+    // 3. Базовая стоимость = экраны + фиксированные услуги
+    const basePrice = this.screenPrice + this.servicePricesNumber;
+
+    // 4. Считаем процентные услуги от базовой стоимости
+    this.servicePricesPercent = 0;
     for (const key in this.servicesPercent) {
       this.servicePricesPercent +=
-        this.screenPrice * (this.servicesPercent[key] / 100);
+        basePrice * (this.servicesPercent[key] / 100);
     }
 
-    // 4. Считаем полную стоимость (до скидки/отката)
-    this.fullPrice =
-      this.screenPrice + this.servicePricesNumber + this.servicePricesPercent;
+    // 5. Полная стоимость = базовая + процентные услуги
+    this.fullPrice = basePrice + this.servicePricesPercent;
   },
 
   logger: function () {
