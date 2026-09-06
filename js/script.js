@@ -42,7 +42,7 @@ const appData = {
     this.addTitle();
 
     // Добавляем валидацию при старте (на случай, если уже есть данные)
-    this.validateScreens();
+    this.validateScreens() ;
 
     // Безопасная подписка на события: проверяем наличие элемента перед addEventListener
     if (btnStart) {
@@ -54,7 +54,7 @@ const appData = {
     }
 
     if (btnReset) {
-      btnReset.addEventListener("click", () => this.resetAll());
+      btnReset.addEventListener("click", () => this.reset());
     } else {
       console.warn("Кнопка «Сброс» не найдена.");
     }
@@ -140,7 +140,7 @@ const appData = {
     this.calculateRollbackPrice(); // считаем финальную цену с откатом
     this.showResult();
 
-    // Блокируем левую часть: все input[type=text] и select
+    // Блокируем все input[type=text] и select
     const inputsText = document.querySelectorAll("input[type='text']");
     const selects = document.querySelectorAll("select");
 
@@ -152,40 +152,78 @@ const appData = {
     if (btnReset) btnReset.style.display = "inline-block";
   },
 
-  resetAll: function () {
-    // Разблокируем поля
+  reset: function () {
+    // 1. Сбрасываем свойства объекта к исходным значениям
+    this.screens = [];
+    this.screenPrice = 0;
+    this.servicePricesPercent = 0;
+    this.servicePricesNumber = 0;
+    this.fullPrice = 0;
+    this.servicesPercent = {};
+    this.servicesNumber = {};
+    this.totalScreensCount = 0;
+    this.priceWithRollback = 0;
+    this.isCalculated = false;
+
+    // 2. Сбрасываем ползунок отката
+    this.rollback = 0;
+    if (inputRange) inputRange.value = 0;
+    if (inputRangeValue) inputRangeValue.textContent = "0%";
+
+    // 3. Удаляем все динамически добавленные блоки .screen (оставляем первый)
+    screens = document.querySelectorAll(".screen");
+    for (let i = screens.length - 1; i > 0; i--) {
+      screens[i].remove();
+    }
+
+    // 4. Очищаем значения в оставшемся (первом) блоке .screen
+    screens = document.querySelectorAll(".screen");
+    screens.forEach((screen) => {
+      const select = screen.querySelector("select");
+      const input = screen.querySelector("input[type='number']");
+      const errorEl = screen.querySelector(".error-message");
+
+      if (select) select.selectedIndex = 0;
+      if (input) {
+        input.value = "";
+        input.classList.remove("invalid-input");
+      }
+      if (errorEl) {
+        errorEl.textContent = "";
+        errorEl.classList.remove("visible");
+      }
+    });
+
+    // 5. Снимаем все чекбоксы услуг
+    const allCheckboxes = document.querySelectorAll("input[type='checkbox']");
+    allCheckboxes.forEach((cb) => (cb.checked = false));
+
+    // 6. Очищаем текстовые поля услуг
+    const serviceInputs = document.querySelectorAll(
+      ".other-items input[type='text']",
+    );
+    serviceInputs.forEach((el) => (el.value = ""));
+
+    // 7. Разблокируем все input[type=text] и select
     const inputsText = document.querySelectorAll("input[type='text']");
     const selects = document.querySelectorAll("select");
 
     inputsText.forEach((el) => (el.disabled = false));
     selects.forEach((el) => (el.disabled = false));
 
-    // Показываем Старт, скрываем Сброс
-    if (btnStart) btnStart.style.display = "inline-block";
-    if (btnReset) btnReset.style.display = "none";
-
-    // Сбрасываем состояние
-    this.isCalculated = false;
-    this.priceWithRollback = 0;
-    this.fullPrice = 0;
-    this.screenPrice = 0;
-    this.servicePricesPercent = 0;
-    this.servicePricesNumber = 0;
-    this.totalScreensCount = 0;
-    this.screens = [];
-
-    // Очищаем итоговые поля
+    // 8. Очищаем итоговые поля
     if (total) total.value = "";
     if (totalCountOther) totalCountOther.value = "";
     if (fullTotalCount) fullTotalCount.value = "";
     if (totalCount) totalCount.value = "";
     if (totalCountRollback) totalCountRollback.value = "";
 
-    // Убираем подсветку ошибок
-    const invalidInputs = document.querySelectorAll(".invalid-input");
-    invalidInputs.forEach((el) => el.classList.remove("invalid-input"));
+    // 9. Переключаем кнопки: Сброс → Старт
+    if (btnStart) btnStart.style.display = "inline-block";
+    if (btnReset) btnReset.style.display = "none";
 
-    // Пересчитываем валидность (чтобы кнопка Старт снова могла стать активной)
+    // 10. Пересчитываем валидность (кнопка Старт должна стать неактивной,
+    //     т.к. поля очищены)
     this.validateScreens();
   },
 
