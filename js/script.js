@@ -42,7 +42,7 @@ const appData = {
     this.addTitle();
 
     // Добавляем валидацию при старте (на случай, если уже есть данные)
-    this.validateScreens() ;
+    this.validateScreens();
 
     // Безопасная подписка на события: проверяем наличие элемента перед addEventListener
     if (btnStart) {
@@ -114,6 +114,43 @@ const appData = {
         this.validateScreens();
       }
     });
+
+    // Подключаем логику CMS-блока
+    this.initCmsToggle();
+  },
+
+  // Новый метод: управление видимостью .hidden-cms-variants
+  initCmsToggle: function () {
+    const cmsCheckbox = document.getElementById("cms-open");
+    const cmsBlock = document.querySelector(".hidden-cms-variants");
+
+    if (!cmsCheckbox) {
+      console.warn("#cms-open не найден — логика CMS не подключится.");
+      return;
+    }
+
+    // Если блока нет — просто не показываем, но не ломаем скрипт
+    if (!cmsBlock) {
+      console.warn(
+        ".hidden-cms-variants не найден — блок не будет переключаться.",
+      );
+      return;
+    }
+
+    cmsCheckbox.addEventListener("change", () => {
+      if (cmsCheckbox.checked) {
+        cmsBlock.style.display = "flex";
+      } else {
+        cmsBlock.style.display = "none";
+      }
+    });
+
+    // Инициализация состояния при загрузке страницы
+    if (cmsCheckbox.checked) {
+      cmsBlock.style.display = "flex";
+    } else {
+      cmsBlock.style.display = "none";
+    }
   },
 
   addTitle: function () {
@@ -222,7 +259,11 @@ const appData = {
     if (btnStart) btnStart.style.display = "inline-block";
     if (btnReset) btnReset.style.display = "none";
 
-    // 10. Пересчитываем валидность (кнопка Старт должна стать неактивной,
+    // 10. Скрываем CMS-блок, если чекбокс снят
+    const cmsBlock = document.querySelector(".hidden-cms-variants");
+    if (cmsBlock) cmsBlock.style.display = "none";
+
+    // 11. Пересчитываем валидность (кнопка Старт должна стать неактивной,
     //     т.к. поля очищены)
     this.validateScreens();
   },
